@@ -95,4 +95,4 @@ class Assignment(db.Model):
 
     @classmethod
     def get_assignments_by_principal(cls):
-        return cls.query.filter(((cls.state == AssignmentStateEnum.GRADED) | (cls.state == AssignmentStateEnum.SUBMITTED)) & (cls.state != AssignmentStateEnum.DRAFT)).all()
+        return cls.query.filter((cls.state == AssignmentStateEnum.SUBMITTED) | (cls.state == AssignmentStateEnum.GRADED)).all()
