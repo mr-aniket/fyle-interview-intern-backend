@@ -51,9 +51,9 @@ class Assignment(db.Model):
             assertions.assert_found(assignment, 'No assignment with this id was found')
             assertions.assert_valid(assignment.state == AssignmentStateEnum.DRAFT,
                                     'only assignment in draft state can be edited')
-
             assignment.content = assignment_new.content
         else:
+            assertions.assert_valid(assignment_new.content is not None, 'assignment with empty content cannot be submitted')
             assignment = assignment_new
             db.session.add(assignment_new)
 
