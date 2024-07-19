@@ -83,6 +83,13 @@ class Assignment(db.Model):
         assertions.assert_found(assignment, 'No assignment with this id was found')
         assertions.assert_valid(grade is not None, 'assignment with empty grade cannot be graded')
 
+        '''This will allow only available grades in GradeEnum'''
+        if grade not in [g.value for g in GradeEnum]:
+            raise exceptions.ValidationError('invalid grade')
+
+        if assignment.teacher_id != auth_principal.teacher_id:
+            raise exceptions.FyleError(400,'Assignment was not submitted to this teacher')
+
         assignment.grade = grade
         assignment.state = AssignmentStateEnum.GRADED
         db.session.flush()
