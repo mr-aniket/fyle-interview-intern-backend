@@ -97,6 +97,34 @@ class Assignment(db.Model):
         return assignment
 
     @classmethod
+    def mark_grade_by_principal(cls, _id, grade, auth_principal: AuthPrincipal):
+        assignment = Assignment.get_by_id(_id)
+        assertions.assert_found(assignment, 'No assignment with this id was found')
+        assertions.assert_valid(grade is not None, 'assignment with empty grade cannot be graded')
+        
+        '''This will allow only available grades in GradeEnum'''
+        if grade not in [g.value for g in GradeEnum]:
+            raise exceptions.FyleError(400, 'invalid grade')
+
+        if assignment.state == AssignmentStateEnum.DRAFT:
+            print('Assignment is in draft state, cannot be graded')
+            print(assignment.state)
+            raise exceptions.FyleError(400, 'Assignment is in draft state, cannot be graded')
+
+        if assignment.state == AssignmentStateEnum.GRADED:
+            pass
+
+        elif assignment.state != AssignmentStateEnum.SUBMITTED:
+            raise exceptions.FyleError(400, 'Only submitted assignments can be graded by principal')
+        
+        assignment.grade = grade
+        assignment.state = AssignmentStateEnum.GRADED
+        
+        db.session.flush()
+
+        return assignment
+
+    @classmethod
     def get_assignments_by_student(cls, student_id):
         return cls.filter(cls.student_id == student_id).all()
 
