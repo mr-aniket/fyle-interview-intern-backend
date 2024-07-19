@@ -1,7 +1,7 @@
 import enum
 from core import db
 from core.apis.decorators import AuthPrincipal
-from core.libs import helpers, assertions
+from core.libs import helpers, assertions, exceptions
 from core.models.teachers import Teacher
 from core.models.students import Student
 from core.models.principals import Principal
@@ -67,7 +67,11 @@ class Assignment(db.Model):
         assertions.assert_valid(assignment.student_id == auth_principal.student_id, 'This assignment belongs to some other student')
         assertions.assert_valid(assignment.content is not None, 'assignment with empty content cannot be submitted')
 
+        if assignment.state == AssignmentStateEnum.SUBMITTED:
+            raise exceptions.FyleError(400,'only a draft assignment can be submitted')
+            
         assignment.teacher_id = teacher_id
+        assignment.state = AssignmentStateEnum.SUBMITTED
         db.session.flush()
 
         return assignment
